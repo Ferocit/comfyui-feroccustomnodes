@@ -55,3 +55,4 @@ As a Gemini CLI agent, my core mandates for this project (and others) include:
 *   **User Control:** Respect user confirmations and choices.
 *   **README.md Maintenance:** The `README.md` file will be updated as needed to reflect project changes.
 *   **Persistence:** Continue working until the user's query is fully resolved.
+*   **Git Operations:** All Git commands and operations will be performed manually by the user. I will not execute any `git` commands.

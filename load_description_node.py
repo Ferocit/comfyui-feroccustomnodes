@@ -1,93 +1,114 @@
 import os
+import time
 
 NODE_FILE_PATH = os.path.dirname(__file__)
 DESCRIPTION_FOLDER_NAME = "descriptions"
 DESCRIPTION_PATH = os.path.join(NODE_FILE_PATH, DESCRIPTION_FOLDER_NAME)
 
-if not os.path.exists(DESCRIPTION_PATH):
-    os.makedirs(DESCRIPTION_PATH)
+# Ensure base folder exists
+os.makedirs(DESCRIPTION_PATH, exist_ok=True)
 
-def get_description_subdirectories():
-    subdirectories = [""] # Add empty string for the root descriptions folder
-    if not os.path.isdir(DESCRIPTION_PATH):
-        return subdirectories
-
+def _ensure_example_exists():
+    """Create examples/example.txt if there are no .txt files anywhere under descriptions."""
     for root, dirs, files in os.walk(DESCRIPTION_PATH):
-        for d in dirs:
-            relative_path = os.path.relpath(os.path.join(root, d), DESCRIPTION_PATH)
-            subdirectories.append(relative_path.replace("\", "/"))
-    
-    # Ensure example directory exists if no other subdirectories or files are present
-    if not subdirectories and not any(f.endswith(".txt") for f in os.listdir(DESCRIPTION_PATH)):
-        example_dir = os.path.join(DESCRIPTION_PATH, "examples")
-        if not os.path.exists(example_dir):
-            os.makedirs(example_dir)
-        placeholder_path = os.path.join(example_dir, "example.txt")
-        if not os.path.exists(placeholder_path):
-            with open(placeholder_path, 'w', encoding='utf-8') as f:
-                f.write("Put your description files in subdirectories under 'descriptions'.")
-        subdirectories.append("examples") # Add example directory if created
+        if any(f.endswith(".txt") for f in files):
+            return
+    example_dir = os.path.join(DESCRIPTION_PATH, "examples")
+    os.makedirs(example_dir, exist_ok=True)
+    placeholder_path = os.path.join(example_dir, "example.txt")
+    if not os.path.exists(placeholder_path):
+        with open(placeholder_path, 'w', encoding='utf-8') as f:
+            f.write("Put your description files in subdirectories under 'descriptions'.")
 
-    return sorted(list(set(subdirectories))) # Use set to remove duplicates and sort
+# Create example once at import time if needed
+_ensure_example_exists()
 
-def get_description_files_in_subdir(subdirectory=""):
-    full_subdir_path = os.path.join(DESCRIPTION_PATH, subdirectory)
-    file_list = []
-    if not os.path.isdir(full_subdir_path):
-        return ["No files found"]
-
-    for file in os.listdir(full_subdir_path):
-        if file.endswith(".txt"):
-            file_list.append(os.path.splitext(file)[0]) # Remove .txt extension
-
-    if not file_list:
-        # Create an example file in the base descriptions directory if it's empty
-        if subdirectory == "": # Only create example in root if no files
-            example_dir = os.path.join(DESCRIPTION_PATH, "examples")
-            if not os.path.exists(example_dir):
-                os.makedirs(example_dir)
-            placeholder_path = os.path.join(example_dir, "example.txt")
-            if not os.path.exists(placeholder_path):
-                with open(placeholder_path, 'w', encoding='utf-8') as f:
-                    f.write("Put your description files in subdirectories under 'descriptions'.")
-            file_list = ["example"] # Point to the example file
-
-    return sorted(file_list)
+def list_all_description_files():
+    """Return a sorted list of all .txt files relative to DESCRIPTION_PATH, including extension."""
+    results = []
+    for root, dirs, files in os.walk(DESCRIPTION_PATH):
+        for file in files:
+            if file.lower().endswith(".txt"):
+                rel_dir = os.path.relpath(root, DESCRIPTION_PATH)
+                if rel_dir == ".":
+                    entry = file  # keep .txt extension so UI passes full name back
+                else:
+                    rel_dir_fixed = rel_dir.replace("\\", "/")
+                    entry = rel_dir_fixed + "/" + file
+                results.append(entry)
+    if not results:
+        _ensure_example_exists()
+        return ["examples/example.txt"]
+    return sorted(results)
 
 class LoadDescriptionNode:
-    def __init__(self):
-        pass
-
-    @classmethod
-    def get_files_for_dropdown(cls, subdirectory):
-        return get_description_files_in_subdir(subdirectory)
-
     @classmethod
     def INPUT_TYPES(cls):
+        files = list_all_description_files()
+        if not files:
+            files = ["examples/example"]
+        default_file = files[0]
         return {
             "required": {
-                "subdirectory": (get_description_subdirectories(), {"default": ""}),
-                "file_name": (cls.get_files_for_dropdown, {"default": "No files found"}),
+                # Dropdown with all files
+                "file_path": (files, {"default": default_file}),
             }
         }
 
-    RETURN_TYPES = ("STRING", "STRING",)
-    RETURN_NAMES = ("description_text", "description_name",)
+    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_NAMES = ("description_text", "description_name")
     FUNCTION = "load_description"
     CATEGORY = "Feroc"
 
-    def load_description(self, subdirectory, file_name, **kwargs):
-        if file_name == "No files found" or not file_name:
-            print("[LoadDescriptionNode] WARNING: No file selected or found.")
-            return ("", "")
+    @staticmethod
+    def _abs_path(file_path: str) -> str:
+        # Accept values with or without .txt and with either slash direction
+        s = str(file_path).strip().replace("\\", "/")
+        if s.endswith(".txt"):
+            s = s[:-4]
+        parts = [p for p in s.split("/") if p]
+        return os.path.join(DESCRIPTION_PATH, *parts) + ".txt"
 
-        # Construct the full path
-        full_file_path = os.path.join(DESCRIPTION_PATH, subdirectory, f"{file_name}.txt")
-        
+    @classmethod
+    def IS_CHANGED(cls, file_path=None, **kwargs):
+        """Re-execute when content changes based on mtime and size."""
+        try:
+            if not file_path or file_path == "undefined":
+                files = list_all_description_files()
+                file_path = files[0] if files else "examples/example.txt"
+            abs_path = cls._abs_path(file_path)
+            st = os.stat(abs_path)
+            return f"{st.st_mtime_ns}:{st.st_size}"
+        except Exception:
+            return str(time.time())
+
+    @staticmethod
+    def _abs_path(file_path: str) -> str:
+        parts = [p for p in str(file_path).split("/") if p]
+        return os.path.join(DESCRIPTION_PATH, *parts)
+
+    @classmethod
+    def IS_CHANGED(cls, file_path=None, **kwargs):
+        try:
+            if not file_path or file_path == "undefined":
+                files = list_all_description_files()
+                file_path = files[0] if files else "examples/example.txt"
+            abs_path = cls._abs_path(file_path)
+            st = os.stat(abs_path)
+            return f"{st.st_mtime_ns}:{st.st_size}"
+        except Exception:
+            return str(time.time())
+
+    def load_description(self, file_path, **kwargs):
+        if not file_path or file_path == "undefined":
+            files = list_all_description_files()
+            file_path = files[0] if files else "examples/example.txt"
+        full_file_path = self._abs_path(file_path)
         try:
             with open(full_file_path, 'r', encoding='utf-8') as f:
                 text = f.read()
-            return (text, file_name)
+            name = os.path.splitext(os.path.basename(full_file_path))[0]
+            return (text, name)
         except Exception as e:
             print(f"Error loading description from {full_file_path}: {e}")
             return ("", "")
