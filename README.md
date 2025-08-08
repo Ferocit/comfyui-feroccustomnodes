@@ -19,7 +19,8 @@ This node allows you to load text files from a designated `descriptions` folder 
 
 **Inputs:**
 
-*   `description_file` (Dropdown): A dynamic list of `.txt` files found in the `descriptions` folder and its subdirectories. The dropdown displays paths relative to the `descriptions` folder (e.g., `character_descriptions/Tabea`).
+*   `subdirectory` (Dropdown): A dynamic list of subdirectories found within the `descriptions` folder. An empty string represents the root `descriptions` folder.
+*   `file_name` (Dropdown): A dynamic list of `.txt` files found within the selected `subdirectory`.
 
 **Outputs:**
 
@@ -28,9 +29,11 @@ This node allows you to load text files from a designated `descriptions` folder 
 
 **Usage:**
 
-Place your `.txt` description files inside the `ComfyUI/custom_nodes/comfyui-feroc/descriptions/` folder. You can organize them into subdirectories (e.g., `descriptions/characters/my_character.txt`). The node will automatically detect and list them in the dropdown.
+Place your `.txt` description files inside the `ComfyUI/custom_nodes/comfyui-feroc/descriptions/` folder. You can organize them into subdirectories (e.g., `descriptions/characters/my_character.txt`).
 
-If the `descriptions` folder is empty, an example file `descriptions/examples/example.txt` will be created to guide you.
+First, select a `subdirectory` from the dropdown. Then, the `file_name` dropdown will populate with the `.txt` files available in that subdirectory.
+
+If the `descriptions` folder or a selected subdirectory is empty, an example file `descriptions/examples/example.txt` will be created to guide you.
 
 ### 2. `RandomLineFromText` (Category: Feroc)
 
