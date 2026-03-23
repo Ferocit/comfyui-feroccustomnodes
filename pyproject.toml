@@ -28,7 +28,7 @@ Documentation = "https://github.com/Ferocit/comfyui-feroccustomnodes/wiki"
 "Bug Tracker" = "https://github.com/Ferocit/comfyui-feroccustomnodes/issues"
 
 [tool.comfy]
-PublisherId = ""
+PublisherId = "ferocit"
 DisplayName = "comfyui-feroccustomnodes"
 Icon = ""
 includes = [] 
