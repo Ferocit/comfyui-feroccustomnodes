@@ -26,7 +26,12 @@ class RandomLineFromText:
     RETURN_TYPES = ("STRING",)
     FUNCTION = "get_random_lines"
 
-    def get_random_lines(self, seed, **kwargs):
+    def get_random_lines(self, seed: int, **kwargs) -> tuple[str]:
+        """Select one random line from each provided text file.
+
+        Returns:
+            Tuple containing a single string with all selected lines joined by newline.
+        """
         rng = random.Random(seed)
         file_paths = [kwargs.get(f'file_path_{i}') for i in range(1, MAX_FILE_INPUTS + 1)]
         selected_lines = []

@@ -89,7 +89,12 @@ class LoadDescriptionNode:
         except Exception:
             return str(time.time())
 
-    def load_description(self, file_path, **kwargs):
+    def load_description(self, file_path: str, **kwargs) -> tuple[str, str]:
+        """Load description text from the given file path.
+
+        Returns:
+            Tuple of (file content, filename without extension). Returns ('', '') on error.
+        """
         full_file_path = self._abs_path(self._resolve_file_path(file_path))
         text = read_text_file(full_file_path)
         if not text and not os.path.exists(full_file_path):
