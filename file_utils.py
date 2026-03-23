@@ -28,7 +28,7 @@ def read_random_line(path: str, rng: random.Random) -> Optional[str]:
     """Return a random non-empty line from a file. Returns None if file is empty or missing."""
     try:
         with open(path, 'r', encoding='utf-8') as f:
-            lines = [line for line in f if line.strip()]
+            lines = [line.rstrip('\n') for line in f if line.strip()]
         if lines:
             return rng.choice(lines)
         logger.warning("No non-empty lines found in: %s", path)

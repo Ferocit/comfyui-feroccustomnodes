@@ -54,6 +54,14 @@ class TestReadRandomLine:
         assert result is not None
         assert result.strip() == "only_line"
 
+    def test_no_trailing_newline_in_result(self, tmp_path):
+        f = tmp_path / "lines.txt"
+        f.write_text("apple\nbanana\ncherry\n", encoding="utf-8")
+        rng = random.Random(0)
+        result = file_utils.read_random_line(str(f), rng)
+        assert result is not None
+        assert not result.endswith('\n')
+
 
 class TestNormalizeDescriptionPath:
     def test_adds_txt_extension(self, tmp_path, monkeypatch):
