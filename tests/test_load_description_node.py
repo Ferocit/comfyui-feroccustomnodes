@@ -56,6 +56,61 @@ class TestLoadDescription:
         assert name == "nested"
 
 
+class TestListAllDescriptionFiles:
+    """Tests for list_all_description_files (Issue #9)."""
+
+    def test_finds_flat_txt_files(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(ldn, "DESCRIPTION_PATH", str(tmp_path))
+        monkeypatch.setattr(file_utils, "DESCRIPTION_PATH", str(tmp_path))
+        (tmp_path / "a.txt").write_text("a", encoding="utf-8")
+        (tmp_path / "b.txt").write_text("b", encoding="utf-8")
+        result = ldn.list_all_description_files()
+        assert "a.txt" in result
+        assert "b.txt" in result
+
+    def test_finds_nested_txt_files(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(ldn, "DESCRIPTION_PATH", str(tmp_path))
+        monkeypatch.setattr(file_utils, "DESCRIPTION_PATH", str(tmp_path))
+        sub = tmp_path / "sub"
+        sub.mkdir()
+        (sub / "nested.txt").write_text("n", encoding="utf-8")
+        result = ldn.list_all_description_files()
+        assert "sub/nested.txt" in result
+
+    def test_returns_sorted_list(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(ldn, "DESCRIPTION_PATH", str(tmp_path))
+        monkeypatch.setattr(file_utils, "DESCRIPTION_PATH", str(tmp_path))
+        for name in ["z.txt", "a.txt", "m.txt"]:
+            (tmp_path / name).write_text("x", encoding="utf-8")
+        result = ldn.list_all_description_files()
+        assert result == sorted(result)
+
+
+class TestIsChanged:
+    """Tests for LoadDescriptionNode.IS_CHANGED (Issue #9)."""
+
+    def test_returns_string(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(ldn, "DESCRIPTION_PATH", str(tmp_path))
+        monkeypatch.setattr(file_utils, "DESCRIPTION_PATH", str(tmp_path))
+        (tmp_path / "f.txt").write_text("content", encoding="utf-8")
+        result = LoadDescriptionNode.IS_CHANGED(file_path="f.txt")
+        assert isinstance(result, str)
+
+    def test_changes_after_file_modification(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(ldn, "DESCRIPTION_PATH", str(tmp_path))
+        monkeypatch.setattr(file_utils, "DESCRIPTION_PATH", str(tmp_path))
+        f = tmp_path / "f.txt"
+        f.write_text("v1", encoding="utf-8")
+        val1 = LoadDescriptionNode.IS_CHANGED(file_path="f.txt")
+        f.write_text("v1_changed_longer_content", encoding="utf-8")
+        val2 = LoadDescriptionNode.IS_CHANGED(file_path="f.txt")
+        assert val1 != val2
+
+    def test_returns_fallback_for_missing_file(self):
+        result = LoadDescriptionNode.IS_CHANGED(file_path="/no/such/file.txt")
+        assert isinstance(result, str)
+
+
 class TestResolveFilePath:
     """Tests for LoadDescriptionNode._resolve_file_path (Issue #5)."""
 
