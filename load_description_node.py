@@ -3,8 +3,10 @@ import time
 
 try:
     from .config import DESCRIPTION_PATH, TEXT_FILE_EXTENSION, FALLBACK_FILE
+    from .file_utils import read_text_file, normalize_description_path
 except ImportError:
     from config import DESCRIPTION_PATH, TEXT_FILE_EXTENSION, FALLBACK_FILE
+    from file_utils import read_text_file, normalize_description_path
 
 # Ensure base folder exists
 os.makedirs(DESCRIPTION_PATH, exist_ok=True)
@@ -67,12 +69,7 @@ class LoadDescriptionNode:
 
     @staticmethod
     def _abs_path(file_path: str) -> str:
-        # Accept values with or without .txt and with either slash direction
-        s = str(file_path).strip().replace("\\", "/")
-        if s.endswith(TEXT_FILE_EXTENSION):
-            s = s[:-len(TEXT_FILE_EXTENSION)]
-        parts = [p for p in s.split("/") if p]
-        return os.path.join(DESCRIPTION_PATH, *parts) + TEXT_FILE_EXTENSION
+        return normalize_description_path(file_path)
 
     @classmethod
     def IS_CHANGED(cls, file_path=None, **kwargs):
@@ -92,11 +89,8 @@ class LoadDescriptionNode:
             files = list_all_description_files()
             file_path = files[0] if files else FALLBACK_FILE
         full_file_path = self._abs_path(file_path)
-        try:
-            with open(full_file_path, 'r', encoding='utf-8') as f:
-                text = f.read()
-            name = os.path.splitext(os.path.basename(full_file_path))[0]
-            return (text, name)
-        except Exception as e:
-            print(f"Error loading description from {full_file_path}: {e}")
+        text = read_text_file(full_file_path)
+        if not text and not os.path.exists(full_file_path):
             return ("", "")
+        name = os.path.splitext(os.path.basename(full_file_path))[0]
+        return (text, name)
