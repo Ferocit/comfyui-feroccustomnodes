@@ -3,3 +3,11 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# AI agent instruction files
+gemini.md
+GEMINI.md
+claude.md
+CLAUDE.md
+copilot-instructions.md
+.cursorrules
