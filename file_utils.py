@@ -1,3 +1,4 @@
+"""File I/O utilities shared across ComfyUI Feroc custom nodes."""
 import logging
 import os
 import random

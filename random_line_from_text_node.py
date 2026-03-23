@@ -1,3 +1,4 @@
+"""ComfyUI custom node for selecting a random line from one or more text files."""
 import random
 
 try:

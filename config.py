@@ -1,3 +1,4 @@
+"""Shared configuration constants for the ComfyUI Feroc custom nodes plugin."""
 import os
 
 NODE_FILE_PATH = os.path.dirname(__file__)

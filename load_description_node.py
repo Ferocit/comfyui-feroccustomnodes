@@ -1,3 +1,4 @@
+"""ComfyUI custom node for loading text description files from a dropdown."""
 import os
 import time
 
