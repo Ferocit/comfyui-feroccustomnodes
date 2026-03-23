@@ -71,24 +71,26 @@ class LoadDescriptionNode:
     def _abs_path(file_path: str) -> str:
         return normalize_description_path(file_path)
 
+    @staticmethod
+    def _resolve_file_path(file_path: str) -> str:
+        """Return file_path or fall back to the first available description file."""
+        if not file_path or file_path == "undefined":
+            files = list_all_description_files()
+            return files[0] if files else FALLBACK_FILE
+        return file_path
+
     @classmethod
     def IS_CHANGED(cls, file_path=None, **kwargs):
         """Re-execute when content changes based on mtime and size."""
         try:
-            if not file_path or file_path == "undefined":
-                files = list_all_description_files()
-                file_path = files[0] if files else FALLBACK_FILE
-            abs_path = cls._abs_path(file_path)
+            abs_path = cls._abs_path(cls._resolve_file_path(file_path))
             st = os.stat(abs_path)
             return f"{st.st_mtime_ns}:{st.st_size}"
         except Exception:
             return str(time.time())
 
     def load_description(self, file_path, **kwargs):
-        if not file_path or file_path == "undefined":
-            files = list_all_description_files()
-            file_path = files[0] if files else FALLBACK_FILE
-        full_file_path = self._abs_path(file_path)
+        full_file_path = self._abs_path(self._resolve_file_path(file_path))
         text = read_text_file(full_file_path)
         if not text and not os.path.exists(full_file_path):
             return ("", "")

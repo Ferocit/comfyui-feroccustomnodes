@@ -56,6 +56,35 @@ class TestLoadDescription:
         assert name == "nested"
 
 
+class TestResolveFilePath:
+    """Tests for LoadDescriptionNode._resolve_file_path (Issue #5)."""
+
+    def test_returns_path_when_set(self):
+        result = LoadDescriptionNode._resolve_file_path("some/path.txt")
+        assert result == "some/path.txt"
+
+    def test_falls_back_when_empty(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(ldn, "DESCRIPTION_PATH", str(tmp_path))
+        monkeypatch.setattr(file_utils, "DESCRIPTION_PATH", str(tmp_path))
+        (tmp_path / "first.txt").write_text("x", encoding="utf-8")
+        result = LoadDescriptionNode._resolve_file_path("")
+        assert result == "first.txt"
+
+    def test_falls_back_when_none(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(ldn, "DESCRIPTION_PATH", str(tmp_path))
+        monkeypatch.setattr(file_utils, "DESCRIPTION_PATH", str(tmp_path))
+        (tmp_path / "first.txt").write_text("x", encoding="utf-8")
+        result = LoadDescriptionNode._resolve_file_path(None)
+        assert result == "first.txt"
+
+    def test_falls_back_when_undefined(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(ldn, "DESCRIPTION_PATH", str(tmp_path))
+        monkeypatch.setattr(file_utils, "DESCRIPTION_PATH", str(tmp_path))
+        (tmp_path / "first.txt").write_text("x", encoding="utf-8")
+        result = LoadDescriptionNode._resolve_file_path("undefined")
+        assert result == "first.txt"
+
+
 class TestAbsPath:
     """Tests for LoadDescriptionNode._abs_path (Issue #3 / #4)."""
 
