@@ -1,9 +1,9 @@
 try:
-    from .feroc_node import RandomLineFromText
+    from .random_line_from_text_node import RandomLineFromTextNode
     from .load_description_node import LoadDescriptionNode
 
     NODE_CLASS_MAPPINGS = {
-        "RandomLineFromText": RandomLineFromText,
+        "RandomLineFromText": RandomLineFromTextNode,
         "LoadDescriptionNode": LoadDescriptionNode,
     }
 

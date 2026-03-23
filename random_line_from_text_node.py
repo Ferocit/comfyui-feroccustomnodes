@@ -8,7 +8,7 @@ except ImportError:
     from file_utils import read_random_line
 
 
-class RandomLineFromText:
+class RandomLineFromTextNode:
     @classmethod
     def INPUT_TYPES(cls):
         optional = {
