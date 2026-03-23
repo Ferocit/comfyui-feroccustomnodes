@@ -1,19 +1,23 @@
 import random
 
+try:
+    from .config import MAX_SEED, MAX_FILE_INPUTS
+except ImportError:
+    from config import MAX_SEED, MAX_FILE_INPUTS
+
+
 class RandomLineFromText:
     @classmethod
     def INPUT_TYPES(cls):
+        optional = {
+            f"file_path_{i}": ("STRING", {"default": ""})
+            for i in range(1, MAX_FILE_INPUTS + 1)
+        }
         return {
             "required": {
-                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": MAX_SEED}),
             },
-            "optional": {
-                "file_path_1": ("STRING", {"default": ""}),
-                "file_path_2": ("STRING", {"default": ""}),
-                "file_path_3": ("STRING", {"default": ""}),
-                "file_path_4": ("STRING", {"default": ""}),
-                "file_path_5": ("STRING", {"default": ""}),
-            }
+            "optional": optional,
         }
 
     CATEGORY = "Feroc"
@@ -22,8 +26,8 @@ class RandomLineFromText:
 
     def get_random_lines(self, seed, **kwargs):
         random.seed(seed)
-        
-        file_paths = [kwargs.get(f'file_path_{i}') for i in range(1, 6)]
+
+        file_paths = [kwargs.get(f'file_path_{i}') for i in range(1, MAX_FILE_INPUTS + 1)]
         selected_lines = []
 
         for path in file_paths:

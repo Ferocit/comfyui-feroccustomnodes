@@ -1,17 +1,19 @@
 import os
 import time
 
-NODE_FILE_PATH = os.path.dirname(__file__)
-DESCRIPTION_FOLDER_NAME = "descriptions"
-DESCRIPTION_PATH = os.path.join(NODE_FILE_PATH, DESCRIPTION_FOLDER_NAME)
+try:
+    from .config import DESCRIPTION_PATH, TEXT_FILE_EXTENSION, FALLBACK_FILE
+except ImportError:
+    from config import DESCRIPTION_PATH, TEXT_FILE_EXTENSION, FALLBACK_FILE
 
 # Ensure base folder exists
 os.makedirs(DESCRIPTION_PATH, exist_ok=True)
 
+
 def _ensure_example_exists():
     """Create examples/example.txt if there are no .txt files anywhere under descriptions."""
     for root, dirs, files in os.walk(DESCRIPTION_PATH):
-        if any(f.endswith(".txt") for f in files):
+        if any(f.endswith(TEXT_FILE_EXTENSION) for f in files):
             return
     example_dir = os.path.join(DESCRIPTION_PATH, "examples")
     os.makedirs(example_dir, exist_ok=True)
@@ -20,15 +22,17 @@ def _ensure_example_exists():
         with open(placeholder_path, 'w', encoding='utf-8') as f:
             f.write("Put your description files in subdirectories under 'descriptions'.")
 
+
 # Create example once at import time if needed
 _ensure_example_exists()
+
 
 def list_all_description_files():
     """Return a sorted list of all .txt files relative to DESCRIPTION_PATH, including extension."""
     results = []
     for root, dirs, files in os.walk(DESCRIPTION_PATH):
         for file in files:
-            if file.lower().endswith(".txt"):
+            if file.lower().endswith(TEXT_FILE_EXTENSION):
                 rel_dir = os.path.relpath(root, DESCRIPTION_PATH)
                 if rel_dir == ".":
                     entry = file  # keep .txt extension so UI passes full name back
@@ -38,8 +42,9 @@ def list_all_description_files():
                 results.append(entry)
     if not results:
         _ensure_example_exists()
-        return ["examples/example.txt"]
+        return [FALLBACK_FILE]
     return sorted(results)
+
 
 class LoadDescriptionNode:
     @classmethod
@@ -64,10 +69,10 @@ class LoadDescriptionNode:
     def _abs_path(file_path: str) -> str:
         # Accept values with or without .txt and with either slash direction
         s = str(file_path).strip().replace("\\", "/")
-        if s.endswith(".txt"):
-            s = s[:-4]
+        if s.endswith(TEXT_FILE_EXTENSION):
+            s = s[:-len(TEXT_FILE_EXTENSION)]
         parts = [p for p in s.split("/") if p]
-        return os.path.join(DESCRIPTION_PATH, *parts) + ".txt"
+        return os.path.join(DESCRIPTION_PATH, *parts) + TEXT_FILE_EXTENSION
 
     @classmethod
     def IS_CHANGED(cls, file_path=None, **kwargs):
@@ -75,7 +80,7 @@ class LoadDescriptionNode:
         try:
             if not file_path or file_path == "undefined":
                 files = list_all_description_files()
-                file_path = files[0] if files else "examples/example.txt"
+                file_path = files[0] if files else FALLBACK_FILE
             abs_path = cls._abs_path(file_path)
             st = os.stat(abs_path)
             return f"{st.st_mtime_ns}:{st.st_size}"
@@ -85,7 +90,7 @@ class LoadDescriptionNode:
     def load_description(self, file_path, **kwargs):
         if not file_path or file_path == "undefined":
             files = list_all_description_files()
-            file_path = files[0] if files else "examples/example.txt"
+            file_path = files[0] if files else FALLBACK_FILE
         full_file_path = self._abs_path(file_path)
         try:
             with open(full_file_path, 'r', encoding='utf-8') as f:
