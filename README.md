@@ -4,57 +4,61 @@ This repository contains custom nodes for ComfyUI, designed to enhance your work
 
 ## Installation
 
-1.  **Clone this repository** into your `ComfyUI/custom_nodes/` directory:
+1. **Clone this repository** into your `ComfyUI/custom_nodes/` directory:
     ```bash
     cd ComfyUI/custom_nodes/
-    git clone https://github.com/YOUR_USERNAME/comfyui-feroc.git # Replace with your actual repository URL
+    git clone https://github.com/Ferocit/comfyui-feroccustomnodes.git
     ```
-2.  **Restart ComfyUI** to load the new nodes.
+2. **Restart ComfyUI** to load the new nodes.
 
 ## Nodes Included
 
 ### 1. `LoadDescriptionNode` (Category: Feroc)
 
-This node allows you to load text files from a designated `descriptions` folder within the `comfyui-feroc` directory. It's ideal for managing character descriptions, lore, or any other text snippets you frequently use in your ComfyUI workflows.
+Loads a text file from the `descriptions` folder inside this plugin's directory. Ideal for managing character descriptions, lore, or any other text snippets you frequently use in your workflows.
 
 **Inputs:**
 
-*   `subdirectory` (Dropdown): A dynamic list of subdirectories found within the `descriptions` folder. An empty string represents the root `descriptions` folder.
-*   `file_name` (Dropdown): A dynamic list of `.txt` files found within the selected `subdirectory`.
+* `file_path` (Dropdown): A dynamic list of all `.txt` files found recursively under the `descriptions` folder, including their subdirectory path (e.g., `characters/tabea.txt`).
 
 **Outputs:**
 
-*   `description_text` (STRING): The full content of the selected text file.
-*   `description_name` (STRING): The base name of the selected description file (e.g., `Tabea`).
+* `description_text` (STRING): The full content of the selected text file.
+* `description_name` (STRING): The filename without extension (e.g., `tabea`).
 
 **Usage:**
 
-Place your `.txt` description files inside the `ComfyUI/custom_nodes/comfyui-feroc/descriptions/` folder. You can organize them into subdirectories (e.g., `descriptions/characters/my_character.txt`).
+Place your `.txt` files inside `ComfyUI/custom_nodes/comfyui-feroccustomnodes/descriptions/`. Subdirectories are supported (e.g., `descriptions/characters/my_character.txt`).
 
-First, select a `subdirectory` from the dropdown. Then, the `file_name` dropdown will populate with the `.txt` files available in that subdirectory.
+If no `.txt` files exist yet, the node automatically creates `descriptions/examples/example.txt` as a placeholder.
 
-If the `descriptions` folder or a selected subdirectory is empty, an example file `descriptions/examples/example.txt` will be created to guide you.
+---
 
 ### 2. `RandomLineFromText` (Category: Feroc)
 
-This node selects a random line from one or more specified text files. It's useful for injecting variability into your prompts or other text inputs by drawing from a pool of predefined lines.
+Selects a random line from one or more text files. Useful for injecting variability into prompts by drawing from a pool of predefined lines.
 
 **Inputs:**
 
-*   `seed` (INT): A seed value for reproducibility of the random selection.
-*   `file_path_1` to `file_path_5` (STRING, Optional): Absolute paths to text files from which a random line will be selected. You can provide up to 5 different file paths.
+* `seed` (INT): Seed for reproducible random selection. The same seed always produces the same output.
+* `file_path_1` to `file_path_5` (STRING, Optional): Absolute paths to text files. Up to 5 files can be provided.
 
 **Outputs:**
 
-*   (STRING): A concatenated string of randomly selected lines, one from each provided file path. Each line is separated by a newline character.
+* (STRING): A newline-separated string of randomly selected lines, one from each provided file.
 
 **Usage:**
 
-Provide the full absolute path to your text files (e.g., `C:\Users\YourUser\Documents\my_lines.txt`). The node will read each file, pick a random non-empty line, and combine them into a single output string. Warnings will be printed to the console if a file is not found or an error occurs during reading.
+Provide the full absolute path to your text files (e.g., `/home/user/my_lines.txt`). The node reads each file, picks a random non-empty line, and combines them into a single output string. Missing or unreadable files are skipped and logged.
 
-## Example Workflow
+---
 
-(Consider adding a screenshot or a brief description of a typical workflow here, e.g., connecting `LoadDescriptionNode` to a `CLIPTextEncode` node, or `RandomLineFromText` to inject dynamic elements into prompts.)
+## Development
+
+Run tests with:
+```bash
+python -m pytest tests/ -v
+```
 
 ## Contributing
 
