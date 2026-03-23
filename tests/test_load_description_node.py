@@ -5,6 +5,52 @@ import load_description_node as ldn
 from load_description_node import LoadDescriptionNode
 
 
+class TestLoadDescription:
+    """Integration tests for LoadDescriptionNode.load_description (Issue #4)."""
+
+    def test_reads_existing_txt_file(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(ldn, "DESCRIPTION_PATH", str(tmp_path))
+        txt_file = tmp_path / "myfile.txt"
+        txt_file.write_text("Hello World", encoding="utf-8")
+
+        node = LoadDescriptionNode()
+        text, name = node.load_description("myfile.txt")
+
+        assert text == "Hello World"
+        assert name == "myfile"
+
+    def test_returns_empty_tuple_when_file_missing(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(ldn, "DESCRIPTION_PATH", str(tmp_path))
+
+        node = LoadDescriptionNode()
+        text, name = node.load_description("nonexistent.txt")
+
+        assert text == ""
+        assert name == ""
+
+    def test_accepts_path_without_txt_extension(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(ldn, "DESCRIPTION_PATH", str(tmp_path))
+        txt_file = tmp_path / "myfile.txt"
+        txt_file.write_text("Content", encoding="utf-8")
+
+        node = LoadDescriptionNode()
+        text, name = node.load_description("myfile")
+
+        assert text == "Content"
+
+    def test_reads_nested_file(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(ldn, "DESCRIPTION_PATH", str(tmp_path))
+        sub = tmp_path / "sub"
+        sub.mkdir()
+        (sub / "nested.txt").write_text("Nested content", encoding="utf-8")
+
+        node = LoadDescriptionNode()
+        text, name = node.load_description("sub/nested.txt")
+
+        assert text == "Nested content"
+        assert name == "nested"
+
+
 class TestAbsPath:
     """Tests for LoadDescriptionNode._abs_path (Issue #3 / #4)."""
 
