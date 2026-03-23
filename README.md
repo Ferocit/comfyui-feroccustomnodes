@@ -19,12 +19,12 @@ Loads a text file from the `descriptions` folder inside this plugin's directory.
 
 **Inputs:**
 
-* `file_path` (Dropdown): A dynamic list of all `.txt` files found recursively under the `descriptions` folder, including their subdirectory path (e.g., `characters/tabea.txt`).
+* `file_path` (Dropdown): A dynamic list of all `.txt` files found recursively under the `descriptions` folder, including their subdirectory path (e.g., `characters/lyraniel_stormweaver.txt`).
 
 **Outputs:**
 
 * `description_text` (STRING): The full content of the selected text file.
-* `description_name` (STRING): The filename without extension (e.g., `tabea`).
+* `description_name` (STRING): The filename without extension (e.g., `lyraniel_stormweaver`).
 
 **Usage:**
 
