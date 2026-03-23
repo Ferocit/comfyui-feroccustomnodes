@@ -82,23 +82,6 @@ class LoadDescriptionNode:
         except Exception:
             return str(time.time())
 
-    @staticmethod
-    def _abs_path(file_path: str) -> str:
-        parts = [p for p in str(file_path).split("/") if p]
-        return os.path.join(DESCRIPTION_PATH, *parts)
-
-    @classmethod
-    def IS_CHANGED(cls, file_path=None, **kwargs):
-        try:
-            if not file_path or file_path == "undefined":
-                files = list_all_description_files()
-                file_path = files[0] if files else "examples/example.txt"
-            abs_path = cls._abs_path(file_path)
-            st = os.stat(abs_path)
-            return f"{st.st_mtime_ns}:{st.st_size}"
-        except Exception:
-            return str(time.time())
-
     def load_description(self, file_path, **kwargs):
         if not file_path or file_path == "undefined":
             files = list_all_description_files()
