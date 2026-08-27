@@ -53,6 +53,23 @@ Provide the full absolute path to your text files (e.g., `/home/user/my_lines.tx
 
 ---
 
+### 3. `MegapixelScale` (Category: Feroc)
+
+Scales a width/height pair to a target megapixel count while preserving the aspect ratio. Useful for normalizing arbitrary image dimensions to a consistent pixel budget before generation.
+
+**Inputs:**
+
+* `width` (INT): Original width.
+* `height` (INT): Original height.
+* `megapixels` (FLOAT): Target size in megapixels (e.g. `1.0` for ~1,000,000 pixels).
+
+**Outputs:**
+
+* `width` (INT): New width, scaled to match the target megapixel count.
+* `height` (INT): New height, scaled to match the target megapixel count, preserving the original aspect ratio.
+
+---
+
 ## Development
 
 Run tests with:
