@@ -35,6 +35,12 @@ class TestScale:
         assert width == 1000
         assert height == 1000
 
+    def test_result_is_multiple_of_eight(self):
+        node = MegapixelScaleNode()
+        width, height = node.scale(1920, 1080, 1.3)
+        assert width % 8 == 0
+        assert height % 8 == 0
+
     def test_returns_tuple_of_ints(self):
         node = MegapixelScaleNode()
         result = node.scale(512, 512, 1.0)
@@ -42,8 +48,8 @@ class TestScale:
         assert len(result) == 2
         assert all(isinstance(v, int) for v in result)
 
-    def test_minimum_size_clamped_to_one(self):
+    def test_minimum_size_clamped_to_eight(self):
         node = MegapixelScaleNode()
         width, height = node.scale(1, 1_000_000, 0.01)
-        assert width >= 1
-        assert height >= 1
+        assert width >= 8
+        assert height >= 8

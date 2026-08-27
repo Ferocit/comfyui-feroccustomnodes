@@ -65,8 +65,10 @@ Scales a width/height pair to a target megapixel count while preserving the aspe
 
 **Outputs:**
 
-* `width` (INT): New width, scaled to match the target megapixel count.
-* `height` (INT): New height, scaled to match the target megapixel count, preserving the original aspect ratio.
+* `width` (INT): New width, scaled to match the target megapixel count and rounded to the nearest multiple of 8.
+* `height` (INT): New height, scaled to match the target megapixel count, preserving the original aspect ratio and rounded to the nearest multiple of 8.
+
+Dimensions are rounded to multiples of 8 for compatibility with diffusion models that require it.
 
 ---
 
